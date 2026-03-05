@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Finanzas"/>
+<meta name="theme-color" content="#6366f1"/>
+<title>Finanzas Personales</title>
+
+<!-- PWA Manifest inline -->
+<script>
+const manifestData = {
+  name: "Finanzas Personales",
+  short_name: "Finanzas",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#f8fafc",
+  theme_color: "#6366f1",
+  icons: [{
+    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236366f1'/><text y='.9em' font-size='70' x='12'>💰</text></svg>",
+    sizes: "192x192", type: "image/svg+xml"
+  }]
+};
+const blob = new Blob([JSON.stringify(manifestData)], {type:'application/json'});
+const manifestURL = URL.createObjectURL(blob);
+document.write('<link rel="manifest" href="' + manifestURL + '">');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --indigo: #6366f1; --indigo-light: #ede9fe; --indigo-dark: #4338ca;
+  --green: #16a34a; --green-light: #f0fdf4; --green-border: #bbf7d0;
+  --red: #dc2626; --red-light: #fef2f2; --red-border: #fecaca;
+  --amber: #d97706; --amber-light: #fffbeb; --amber-border: #fde68a;
+  --cyan: #0891b2; --cyan-light: #ecfeff; --cyan-border: #a5f3fc;
+  --purple: #7c3aed; --purple-light: #f5f3ff; --purple-border: #ddd6fe;
+  --pink: #db2777; --pink-light: #fdf2f8; --pink-border: #fbcfe8;
+  --orange: #ea580c; --orange-light: #fff7ed; --orange-border: #fed7aa;
+  --teal: #059669; --teal-light: #f0fdf4; --teal-border: #6ee7b7;
+  --bg: #f8fafc; --card: #ffffff; --border: #f1f5f9;
+  --text: #0f172a; --text2: #475569; --text3: #94a3b8;
+  --radius: 16px; --shadow: 0 1px 3px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); overscroll-behavior: none; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+
+/* Layout */
+#app { display: flex; flex-direction: column; height: 100dvh; }
+#header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 16px 0; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.05); position: sticky; top: 0; z-index: 50; }
+#content { flex: 1; overflow-y: auto; padding: 16px 16px 100px; }
+#bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; padding: 0 0 env(safe-area-inset-bottom); box-shadow: 0 -4px 20px rgba(0,0,0,.08); z-index: 50; }
+
+/* Header */
+.hdr-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.hdr-logo { display: flex; align-items: center; gap: 10px; }
+.hdr-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg,var(--indigo),var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.hdr-title { font-size: 15px; font-weight: 700; }
+.hdr-sub { font-size: 10px; color: var(--text3); font-weight: 500; }
+.hdr-actions { display: flex; align-items: center; gap: 6px; }
+
+/* Selects in header */
+select.hdr-sel { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); padding: 6px 8px; font-size: 11px; font-family: 'Poppins',sans-serif; outline: none; }
+
+/* Buttons */
+.btn { border: none; border-radius: 10px; padding: 9px 18px; cursor: pointer; font-family: 'Poppins',sans-serif; font-size: 13px; font-weight: 600; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: linear-gradient(135deg,var(--indigo),var(--purple)); color: #fff; box-shadow: 0 4px 12px rgba(99,102,241,.3); }
+.btn-primary:active { transform: scale(.97); }
+.btn-ghost { background: var(--card); color: var(--text2); border: 1.5px solid var(--border); }
+.btn-ghost:active { background: var(--bg); }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 18px; padding: 6px; border-radius: 8px; transition: background .15s; }
+.btn-icon:active { background: var(--bg); }
+
+/* FAB */
+.fab { position: fixed; bottom: calc(70px + env(safe-area-inset-bottom)); right: 18px; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg,var(--indigo),var(--purple)); color: #fff; font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(99,102,241,.45); cursor: pointer; border: none; z-index: 49; transition: transform .15s; }
+.fab:active { transform: scale(.93); }
+
+/* Bottom nav */
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 2px 6px; cursor: pointer; border: none; background: none; font-family: 'Poppins',sans-serif; position: relative; }
+.nav-item .nav-icon { font-size: 20px; line-height: 1; }
+.nav-item .nav-label { font-size: 9px; font-weight: 600; color: var(--text3); margin-top: 2px; letter-spacing: .02em; }
+.nav-item.active .nav-label { color: var(--indigo); }
+.nav-item .nav-badge { position: absolute; top: 5px; right: calc(50% - 16px); width: 16px; height: 16px; border-radius: 8px; background: var(--red); color: #fff; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid var(--card); }
+
+/* Cards */
+.card { background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 12px; }
+.card-colored { border-width: 1.5px; }
+
+/* Stat cards */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card { background: var(--card); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
+.stat-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.stat-num { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.prog { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+.prog-fill { height: 100%; border-radius: 3px; }
+
+/* Balance hero */
+.balance-hero { border-radius: 18px; padding: 22px 20px; margin-bottom: 14px; border-width: 1.5px; border-style: solid; }
+.balance-amount { font-size: 36px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.balance-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+.balance-row { display: flex; gap: 24px; margin-top: 14px; }
+.balance-item .label { font-size: 10px; font-weight: 600; margin-bottom: 3px; opacity: .7; letter-spacing: .05em; text-transform: uppercase; }
+.balance-item .val { font-size: 16px; font-weight: 800; }
+
+/* Records list */
+.rec-list { }
+.rec-row { display: flex; align-items: center; gap: 12px; padding: 12px 8px; border-radius: 10px; transition: background .1s; }
+.rec-row:active { background: var(--bg); }
+.rec-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; border-width: 1.5px; border-style: solid; }
+.rec-info { flex: 1; min-width: 0; }
+.rec-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rec-meta { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.rec-amount { font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.rec-actions { display: flex; gap: 4px; }
+.sep { height: 1px; background: var(--bg); margin: 0 8px; }
+
+/* Section label */
+.slabel { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
+
+/* Badge */
+.badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 20px; font-size: 9px; font-weight: 700; letter-spacing: .04em; border-width: 1px; border-style: solid; }
+
+/* Pill filter */
+.pill-wrap { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 14px; }
+.pill-wrap::-webkit-scrollbar { display: none; }
+.pill { display: inline-flex; align-items: center; gap: 5px; background: var(--bg); color: var(--text2); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; cursor: pointer; transition: all .12s; border: 1.5px solid transparent; white-space: nowrap; font-family: 'Poppins',sans-serif; }
+.pill:active { opacity: .8; }
+.pill.on { background: var(--indigo-light); color: var(--indigo); border-color: #c4b5fd; }
+
+/* Forms / modals */
+.overlay { position: fixed; inset: 0; background: rgba(15,23,42,.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
+.modal { background: var(--card); border-radius: 24px 24px 0 0; padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); width: 100%; max-height: 92dvh; overflow-y: auto; }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
+.field { margin-bottom: 14px; }
+.field-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.inp { background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); padding: 11px 14px; width: 100%; font-size: 14px; outline: none; font-family: 'Poppins',sans-serif; transition: border-color .15s; -webkit-appearance: none; }
+.inp:focus { border-color: var(--indigo); background: var(--card); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 4px; }
+.type-btn { padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Poppins',sans-serif; text-align: center; transition: all .12s; }
+.type-btn.on { border-width: 2px; }
+
+/* Invoice preview */
+.inv-preview { background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; }
+.inv-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
+.inv-row.total { font-size: 15px; font-weight: 800; padding-top: 10px; border-top: 1.5px solid var(--border); margin-bottom: 0; }
+
+/* Reminder card */
+.rem-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: var(--shadow); }
+.rem-icon-wrap { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+
+/* Alert banner */
+.alert-banner { border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; border-width: 1.5px; border-style: solid; }
+.alert-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.alert-row:last-child { margin-bottom: 0; }
+
+/* Invoice table */
+.inv-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.inv-table th { text-align: right; padding: 0 8px 10px; font-size: 9px; font-weight: 700; letter-spacing: .08em; color: var(--text3); text-transform: uppercase; }
+.inv-table th:first-child { text-align: left; }
+.inv-table td { padding: 11px 8px; border-top: 1px solid var(--bg); }
+.inv-table td:first-child { text-align: left; font-weight: 600; }
+.inv-table td:not(:first-child) { text-align: right; }
+.inv-total-row td { font-weight: 800; padding-top: 14px; border-top: 2px solid var(--border); }
+
+/* Notification prompt */
+.notif-prompt { background: linear-gradient(135deg,var(--indigo-light),#f0fdf4); border: 1.5px solid #c4b5fd; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+
+/* Empty state */
+.empty { text-align: center; padding: 40px 16px; color: var(--text3); }
+.empty-icon { font-size: 44px; margin-bottom: 10px; }
+.empty-title { font-size: 15px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+.empty-sub { font-size: 12px; margin-bottom: 20px; }
+
+/* Toast */
+#toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 22px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 999; display: none; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+
+/* Fade anim */
+.fi { animation: fi .2s ease; }
+@keyframes fi { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* Switch */
+.switch { width: 44px; height: 26px; border-radius: 13px; position: relative; cursor: pointer; border: none; transition: background .2s; flex-shrink: 0; }
+.switch::after { content:''; position:absolute; width:20px; height:20px; border-radius:50%; background:#fff; top:3px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+.switch.on { background: var(--green); }
+.switch.on::after { left: 21px; }
+.switch.off { background: #cbd5e1; }
+.switch.off::after { left: 3px; }
+
+/* Progress bar for card */
+.store-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.store-bar-track { flex: 1; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.store-bar-fill { height: 100%; border-radius: 3px; background: var(--amber); }
+
+@media (min-width: 640px) {
+  .stat-grid { grid-template-columns: repeat(4,1fr); }
+  .type-grid { grid-template-columns: repeat(4,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- Notification permission modal -->
+<div id="notif-modal" class="overlay" style="display:none;">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;padding:10px 0 20px">
+      <div style="font-size:48px;margin-bottom:12px">🔔</div>
+      <div class="modal-title" style="text-align:center">Activar Notificaciones</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6">Para recibir recordatorios de impuestos, teléfono e internet directamente en tu iPhone, necesito tu permiso.</p>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:24px;background:var(--bg);padding:12px;border-radius:10px;line-height:1.6">💡 <strong>Importante:</strong> Primero guarda esta app en tu pantalla de inicio (Safari → Compartir → Agregar a pantalla de inicio), luego abre la app desde ahí y activa las notificaciones.</p>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px" onclick="requestNotifPermission()">Activar notificaciones</button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="closeNotifModal()">Ahora no</button>
+    </div>
+  </div>
+</div>
+
+<!-- Record form modal -->
+<div id="form-modal" class="overlay" style="display:none;" onclick="closeForm()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div id="form-title" class="modal-title">Nuevo Registro</div>
+
+    <div class="field">
+      <div class="field-label">Tipo de movimiento</div>
+      <div class="type-grid" id="type-grid"></div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <div class="field-label">Fecha</div>
+        <input class="inp" type="date" id="f-date"/>
+      </div>
+      <div class="field">
+        <div class="field-label">Mes / Año</div>
+        <div style="display:flex;gap:6px">
+          <select class="inp" id="f-month" style="flex:1;padding:11px 6px"></select>
+          <select class="inp" id="f-year" style="width:72px;padding:11px 6px"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Descripción</div>
+      <input class="inp" type="text" id="f-desc" placeholder="Ej: Pago de renta, compra en tienda..."/>
+    </div>
+
+    <!-- Normal amount -->
+    <div class="field" id="amount-block">
+      <div class="field-label">Monto (Q)</div>
+      <input class="inp" type="number" id="f-amount" placeholder="0.00" min="0" step="0.01" inputmode="decimal"/>
+    </div>
+
+    <!-- Invoice fields -->
+    <div id="invoice-block" style="display:none">
+      <div class="row2">
+        <div class="field">
+          <div class="field-label">Cantidad</div>
+          <input class="inp" type="number" id="f-qty" placeholder="1" min="1" step="1" inputmode="numeric" value="1"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Precio unitario (Q)</div>
+          <input class="inp" type="number" id="f-unit" placeholder="0.00" min="0" step="0.01" inputmode="decimal"/>
+        </div>
+      </div>
+      <div class="inv-preview" id="inv-preview" style="margin-bottom:14px">
+        <div class="inv-row"><span style="color:var(--text2)">Subtotal</span><span id="prev-sub">Q0.00</span></div>
+        <div class="inv-row"><span style="color:var(--teal);font-weight:600">IVA 5%</span><span style="color:var(--teal);font-weight:600" id="prev-tax">Q0.00</span></div>
+        <div class="inv-row total"><span>TOTAL</span><span style="color:var(--teal)" id="prev-total">Q0.00</span></div>
+      </div>
+    </div>
+
+    <!-- Card fields -->
+    <div id="card-block" style="display:none">
+      <div class="row2">
+        <div class="field">
+          <div class="field-label">Tienda / Comercio</div>
+          <input class="inp" type="text" id="f-store" placeholder="Amazon, Walmart..."/>
+        </div>
+        <div class="field">
+          <div class="field-label">Cuotas</div>
+          <input class="inp" type="number" id="f-installments" value="1" min="1" max="60" inputmode="numeric"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax fields -->
+    <div id="tax-block" style="display:none">
+      <div class="row2">
+        <div class="field">
+          <div class="field-label">Período fiscal</div>
+          <input class="inp" type="text" id="f-period" placeholder="Ej: Enero 2026"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Estado</div>
+          <select class="inp" id="f-taxstatus">
+            <option value="pendiente">⏳ Pendiente</option>
+            <option value="pagado">✅ Pagado</option>
+            <option value="presentado">📤 Presentado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Etiquetas (opcional)</div>
+      <input class="inp" type="text" id="f-tags" placeholder="trabajo, hogar, urgente..."/>
+    </div>
+
+    <div style="display:flex;gap:10px;padding-top:4px">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeForm()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;justify-content:center" onclick="submitForm()">
+        <span id="form-btn-text">Guardar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Reminder form modal -->
+<div id="rem-modal" class="overlay" style="display:none;" onclick="closeRemForm()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div id="rem-form-title" class="modal-title">Nuevo Recordatorio</div>
+
+    <div class="field">
+      <div class="field-label">Tipo</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="pill on" data-remtype="tax" onclick="selectRemType(this)">📋 Impuestos</button>
+        <button class="pill" data-remtype="phone" onclick="selectRemType(this)">📱 Teléfono</button>
+        <button class="pill" data-remtype="internet" onclick="selectRemType(this)">🌐 Internet</button>
+      </div>
+    </div>
+    <input type="hidden" id="rem-type" value="tax"/>
+
+    <div class="field">
+      <div class="field-label">Descripción</div>
+      <input class="inp" type="text" id="rem-notes" placeholder="Ej: ISR mensual Cindy, Tigo pospago..."/>
+    </div>
+
+    <div class="row3">
+      <div class="field">
+        <div class="field-label">Persona</div>
+        <select class="inp" id="rem-person">
+          <option>Yo</option><option>Cindy</option><option>Ambos</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">Día del mes</div>
+        <input class="inp" type="number" id="rem-day" min="1" max="31" value="15" inputmode="numeric"/>
+      </div>
+      <div class="field">
+        <div class="field-label">Monto (Q)</div>
+        <input class="inp" type="number" id="rem-amount" placeholder="0" min="0" step="0.01" inputmode="decimal"/>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;padding-top:4px">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeRemForm()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;justify-content:center" onclick="submitRemForm()">
+        <span id="rem-btn-text">Guardar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Main app -->
+<div id="app">
+  <div id="header">
+    <div class="hdr-top">
+      <div class="hdr-logo">
+        <div class="hdr-icon">💰</div>
+        <div>
+          <div class="hdr-title">Finanzas</div>
+          <div class="hdr-sub" id="hdr-sub">Control personal</div>
+        </div>
+      </div>
+      <div class="hdr-actions">
+        <select class="hdr-sel" id="hdr-month" onchange="filterChange()"></select>
+        <select class="hdr-sel" id="hdr-year" onchange="filterChange()"></select>
+        <button class="btn-icon" onclick="openNotifModal()" title="Notificaciones" id="notif-btn">🔔</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content"></div>
+
+  <button class="fab" onclick="openForm()" id="fab">＋</button>
+
+  <nav id="bottom-nav">
+    <button class="nav-item active" data-view="dashboard" onclick="setView('dashboard')">
+      <span class="nav-icon">▦</span>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-item" data-view="records" onclick="setView('records')">
+      <span class="nav-icon">☰</span>
+      <span class="nav-label">Registros</span>
+    </button>
+    <button class="nav-item" data-view="invoices" onclick="setView('invoices')">
+      <span class="nav-icon">🧾</span>
+      <span class="nav-label">Facturas</span>
+    </button>
+    <button class="nav-item" data-view="card" onclick="setView('card')">
+      <span class="nav-icon">💳</span>
+      <span class="nav-label">Tarjeta</span>
+    </button>
+    <button class="nav-item" data-view="taxes" onclick="setView('taxes')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Impuestos</span>
+    </button>
+    <button class="nav-item" data-view="reminders" onclick="setView('reminders')" id="nav-reminders">
+      <span class="nav-icon">🔔</span>
+      <span class="nav-label">Avisos</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+// ─── Constants ────────────────────────────────────────────
+const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const TODAY = new Date();
+const TAX_RATE = 0.05;
+
+const CAT = {
+  income:    {label:"Ingresos",          icon:"↑",  color:"#16a34a", bg:"#f0fdf4", border:"#bbf7d0"},
+  expense:   {label:"Egresos",           icon:"↓",  color:"#dc2626", bg:"#fef2f2", border:"#fecaca"},
+  card:      {label:"Tarjeta",           icon:"💳", color:"#d97706", bg:"#fffbeb", border:"#fde68a"},
+  phone:     {label:"Teléfono",          icon:"📱", color:"#7c3aed", bg:"#f5f3ff", border:"#ddd6fe"},
+  services:  {label:"Servicios",         icon:"⚡", color:"#0891b2", bg:"#ecfeff", border:"#a5f3fc"},
+  invoice:   {label:"Facturas",          icon:"🧾", color:"#059669", bg:"#f0fdf4", border:"#6ee7b7"},
+  tax_me:    {label:"Impuestos — Yo",    icon:"📋", color:"#db2777", bg:"#fdf2f8", border:"#fbcfe8"},
+  tax_cindy: {label:"Impuestos — Cindy", icon:"📋", color:"#ea580c", bg:"#fff7ed", border:"#fed7aa"},
+};
+
+const REM_TYPES = {
+  tax:      {label:"Declaración de Impuestos", icon:"📋"},
+  phone:    {label:"Pago de Teléfono",          icon:"📱"},
+  internet: {label:"Pago de Internet",          icon:"🌐"},
+};
+
+// ─── State ────────────────────────────────────────────────
+let records   = JSON.parse(localStorage.getItem("fin_records")   || "[]");
+let reminders = JSON.parse(localStorage.getItem("fin_reminders") || "[]");
+let currentView = "dashboard";
+let filterMonth = TODAY.getMonth();
+let filterYear  = TODAY.getFullYear();
+let filterType  = "all";
+let editId      = null;
+let editRemId   = null;
+let formType    = "income";
+
+// ─── Persistence ─────────────────────────────────────────
+const saveRec = () => localStorage.setItem("fin_records",   JSON.stringify(records));
+const saveRem = () => localStorage.setItem("fin_reminders", JSON.stringify(reminders));
+
+// ─── Format helpers ───────────────────────────────────────
+const fmt = n => "Q" + Number(n||0).toLocaleString("es-GT",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate = s => { if(!s) return ""; const [y,m,d]=s.split("-"); return `${d}/${m}/${y}`; };
+
+// ─── Toast ────────────────────────────────────────────────
+function toast(msg, type="ok") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.style.display = "block";
+  el.style.background = type==="err" ? "#fef2f2" : "#f0fdf4";
+  el.style.border     = `1px solid ${type==="err" ? "#fecaca" : "#bbf7d0"}`;
+  el.style.color      = type==="err" ? "#dc2626" : "#16a34a";
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.style.display="none"; }, 2800);
+}
+
+// ─── Stats helpers ────────────────────────────────────────
+function monthRecs() {
+  return records.filter(r => r.month===filterMonth && r.year===filterYear);
+}
+function sum(type) {
+  return monthRecs().filter(r=>r.type===type).reduce((a,b)=>a+b.amount,0);
+}
+
+// ─── Init ─────────────────────────────────────────────────
+function init() {
+  // Populate header month/year selects
+  const hm = document.getElementById("hdr-month");
+  const hy = document.getElementById("hdr-year");
+  hm.innerHTML = MONTHS.map((m,i)=>`<option value="${i}"${i===filterMonth?" selected":""}>${m}</option>`).join("");
+  hy.innerHTML = [2024,2025,2026,2027].map(y=>`<option value="${y}"${y===filterYear?" selected":""}>${y}</option>`).join("");
+
+  // Populate form month/year
+  document.getElementById("f-month").innerHTML = MONTHS.map((m,i)=>`<option value="${i}">${m.slice(0,3)}</option>`).join("");
+  document.getElementById("f-year").innerHTML  = [2024,2025,2026,2027].map(y=>`<option value="${y}">${y}</option>`).join("");
+
+  // Schedule daily notification check
+  scheduleDailyCheck();
+  checkUrgentReminders();
+  render();
+}
+
+function filterChange() {
+  filterMonth = parseInt(document.getElementById("hdr-month").value);
+  filterYear  = parseInt(document.getElementById("hdr-year").value);
+  render();
+}
+
+// ─── Navigation ───────────────────────────────────────────
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll(".nav-item").forEach(el => {
+    el.classList.toggle("active", el.dataset.view === v);
+  });
+  filterType = "all";
+  render();
+  document.getElementById("content").scrollTop = 0;
+}
+
+// ─── Render dispatcher ────────────────────────────────────
+function render() {
+  const mr = monthRecs();
+  const urgentCount = reminders.filter(r=>r.active && Math.abs(parseInt(r.dueDay)-TODAY.getDate())<=5).length;
+  
+  // Badge on reminders nav
+  const nb = document.getElementById("nav-reminders");
+  const existingBadge = nb.querySelector(".nav-badge");
+  if(existingBadge) existingBadge.remove();
+  if(urgentCount > 0) {
+    const badge = document.createElement("span");
+    badge.className = "nav-badge";
+    badge.textContent = urgentCount;
+    nb.appendChild(badge);
+  }
+
+  document.getElementById("hdr-sub").textContent = `${MONTHS[filterMonth]} ${filterYear}`;
+
+  const c = document.getElementById("content");
+  c.className = "fi";
+  void c.offsetWidth;
+
+  if(currentView==="dashboard") renderDashboard(mr);
+  else if(currentView==="records") renderRecords();
+  else if(currentView==="invoices") renderInvoices(mr);
+  else if(currentView==="card") renderCard(mr);
+  else if(currentView==="taxes") renderTaxes(mr);
+  else if(currentView==="reminders") renderReminders();
+}
+
+// ─── Tax badge helper ─────────────────────────────────────
+function taxBadge(s) {
+  const map = {
+    pagado:    {bg:"#f0fdf4",color:"#16a34a",border:"#bbf7d0"},
+    presentado:{bg:"#eff6ff",color:"#2563eb",border:"#bfdbfe"},
+    pendiente: {bg:"#fffbeb",color:"#d97706",border:"#fde68a"},
+  };
+  const m = map[s]||map.pendiente;
+  return `<span class="badge" style="background:${m.bg};color:${m.color};border-color:${m.border}">${s}</span>`;
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────
+function renderDashboard(mr) {
+  const income=sum("income"), expense=sum("expense"), card=sum("card"),
+        phone=sum("phone"), services=sum("services"), invoices=sum("invoice"),
+        taxMe=sum("tax_me"), taxCindy=sum("tax_cindy");
+  const totalOut = expense+card+phone+services+invoices;
+  const balance  = income - totalOut;
+  const balGreen = balance >= 0;
+
+  const urgent = reminders.filter(r=>r.active && Math.abs(parseInt(r.dueDay)-TODAY.getDate())<=5);
+
+  let html = ``;
+
+  // Urgent banner
+  if(urgent.length) {
+    html += `<div class="alert-banner" style="background:#fffbeb;border-color:#fde68a">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:#d97706;margin-bottom:10px">⚠️ PRÓXIMOS VENCIMIENTOS</div>`;
+    urgent.forEach(r => {
+      const rt = REM_TYPES[r.type]||REM_TYPES.tax;
+      const diff = parseInt(r.dueDay) - TODAY.getDate();
+      html += `<div class="alert-row">
+        <span style="font-size:20px">${rt.icon}</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">${r.notes}</div><div style="font-size:10px;color:#92400e">${rt.label} · ${r.person} · Día ${r.dueDay}${r.amount>0?` · ${fmt(r.amount)}`:""}</div></div>
+        <span class="badge" style="background:${diff<0?"#fef2f2":diff===0?"#fef3c7":"#f0fdf4"};color:${diff<0?"#dc2626":diff===0?"#d97706":"#16a34a"};border-color:${diff<0?"#fecaca":diff===0?"#fde68a":"#bbf7d0"};font-size:10px;font-weight:700">${diff<0?`${Math.abs(diff)}d atrás`:diff===0?"¡HOY!":`${diff}d`}</span>
+      </div>`;
+    });
+    html += `<button onclick="setView('reminders')" style="background:none;border:none;cursor:pointer;font-family:Poppins;font-size:11px;font-weight:600;color:#6366f1;margin-top:6px">Ver recordatorios →</button></div>`;
+  }
+
+  // Balance hero
+  html += `<div class="balance-hero" style="background:${balGreen?"linear-gradient(135deg,#ecfdf5,#d1fae5)":"linear-gradient(135deg,#fef2f2,#fecaca)"};border-color:${balGreen?"#6ee7b7":"#fca5a5"}">
+    <div class="balance-label" style="color:${balGreen?"#065f46":"#991b1b"}">${MONTHS[filterMonth].toUpperCase()} ${filterYear}</div>
+    <div class="balance-amount" style="color:${balGreen?"#059669":"#dc2626"}">${balance>=0?"+":""}${fmt(balance)}</div>
+    <div class="balance-row">
+      <div class="balance-item"><div class="label" style="color:${balGreen?"#065f46":"#991b1b"}">INGRESOS</div><div class="val" style="color:#16a34a">${fmt(income)}</div></div>
+      <div class="balance-item"><div class="label" style="color:${balGreen?"#065f46":"#991b1b"}">EGRESOS</div><div class="val" style="color:#dc2626">${fmt(totalOut)}</div></div>
+    </div>
+  </div>`;
+
+  // Stat grid
+  html += `<div class="stat-grid">`;
+  [{label:"Tarjeta",val:card,color:"#d97706",bg:"#fffbeb",border:"#fde68a"},
+   {label:"Egresos",val:expense,color:"#dc2626",bg:"#fef2f2",border:"#fecaca"},
+   {label:"Servicios",val:services+phone,color:"#0891b2",bg:"#ecfeff",border:"#a5f3fc"},
+   {label:"Facturas",val:invoices,color:"#059669",bg:"#f0fdf4",border:"#6ee7b7"}
+  ].forEach(s => {
+    const pct = totalOut>0 ? Math.min(100,(s.val/totalOut)*100) : 0;
+    html += `<div class="stat-card card-colored" style="background:${s.bg};border-color:${s.border}">
+      <div class="stat-label" style="color:${s.color}">${s.label}</div>
+      <div class="stat-num" style="color:${s.color}">${fmt(s.val)}</div>
+      <div class="prog"><div class="prog-fill" style="width:${pct}%;background:${s.color}"></div></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Recent movements
+  html += `<div class="card"><div class="slabel">Últimos movimientos</div>`;
+  if(!mr.length) {
+    html += `<div class="empty" style="padding:24px 0"><div class="empty-icon">📂</div><div style="font-size:13px;color:var(--text3)">Sin movimientos en ${MONTHS[filterMonth]}</div></div>`;
+  } else {
+    mr.slice(0,7).forEach((r,i) => {
+      const c = CAT[r.type];
+      html += `${i>0?'<div class="sep"></div>':''}
+      <div class="rec-row">
+        <div class="rec-icon" style="background:${c.bg};border-color:${c.border}">${c.icon}</div>
+        <div class="rec-info">
+          <div class="rec-name">${r.description}</div>
+          <div class="rec-meta">${c.label} · ${fmtDate(r.date)}</div>
+        </div>
+        <div class="rec-amount" style="color:${c.color}">${r.type==="income"?"+":"-"}${fmt(r.amount)}</div>
+      </div>`;
+    });
+    if(mr.length>7) html += `<div style="text-align:center;padding-top:10px"><button onclick="setView('records')" style="background:none;border:none;cursor:pointer;font-family:Poppins;font-size:12px;font-weight:600;color:#6366f1">Ver todos (${mr.length}) →</button></div>`;
+  }
+  html += `</div>`;
+
+  // Tax summary
+  html += `<div class="card"><div class="slabel">Impuestos del mes</div>`;
+  [{label:"Yo",type:"tax_me",total:taxMe,color:"#db2777"},{label:"Cindy",type:"tax_cindy",total:taxCindy,color:"#ea580c"}].forEach(t => {
+    const recs = mr.filter(r=>r.type===t.type);
+    html += `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:#475569">${t.label}</span>
+        <span style="font-size:13px;font-weight:700;color:${t.color}">${fmt(t.total)}</span>
+      </div>`;
+    if(!recs.length) html += `<div style="font-size:11px;color:var(--text3)">Sin registros</div>`;
+    else recs.forEach(r => {
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:11px;color:var(--text2)">${r.tax_period||r.description}</span>
+        ${taxBadge(r.tax_status)}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div>`;
+
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── RECORDS ──────────────────────────────────────────────
+function renderRecords() {
+  const filtered = records.filter(r=>(filterType==="all"||r.type===filterType)&&r.month===filterMonth&&r.year===filterYear);
+
+  let pillsHtml = `<div class="pill-wrap">
+    <button class="pill ${filterType==="all"?"on":""}" onclick="setFilter('all')">Todos</button>`;
+  Object.entries(CAT).forEach(([k,v]) => {
+    pillsHtml += `<button class="pill ${filterType===k?"on":""}" onclick="setFilter('${k}')" ${filterType===k?`style="background:${v.bg};color:${v.color};border-color:${v.border}"`:""}>${v.icon} ${v.label}</button>`;
+  });
+  pillsHtml += `</div>`;
+
+  let html = pillsHtml + `<div class="card">`;
+  if(!filtered.length) {
+    html += `<div class="empty" style="padding:30px 0"><div class="empty-icon">📂</div><div style="font-size:13px">Sin registros</div></div>`;
+  } else {
+    filtered.forEach((r,i) => {
+      const c = CAT[r.type];
+      html += `${i>0?'<div class="sep"></div>':''}
+      <div class="rec-row">
+        <div class="rec-icon" style="background:${c.bg};border-color:${c.border}">${c.icon}</div>
+        <div class="rec-info">
+          <div class="rec-name">${r.description}</div>
+          <div class="rec-meta">${c.label} · ${fmtDate(r.date)}${r.card_store?` · ${r.card_store}`:""}${r.card_installments>1?` · ${r.card_installments} cuotas`:""}${r.type==="invoice"?` · ${r.inv_qty}ud × ${fmt(r.inv_unit_price)}`:""}${r.tax_period?` · ${r.tax_period}`:""}</div>
+          ${(r.type==="tax_me"||r.type==="tax_cindy")?taxBadge(r.tax_status):""}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+          <div class="rec-amount" style="color:${c.color}">${r.type==="income"?"+":"-"}${fmt(r.amount)}</div>
+          <div style="display:flex;gap:2px">
+            <button class="btn-icon" style="font-size:14px;color:#94a3b8" onclick="editRecord('${r.id}')">✎</button>
+            <button class="btn-icon" style="font-size:14px;color:#fca5a5" onclick="deleteRecord('${r.id}')">✕</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  if(filtered.length) {
+    const total = filtered.reduce((a,b)=>a+b.amount,0);
+    html += `<div style="display:flex;justify-content:space-between;padding:0 4px;font-size:13px">
+      <span style="color:var(--text3)">${filtered.length} registros</span>
+      <span style="font-weight:700">Total: ${fmt(total)}</span>
+    </div>`;
+  }
+  document.getElementById("content").innerHTML = html;
+}
+
+function setFilter(t) {
+  filterType = t;
+  renderRecords();
+}
+
+// ─── INVOICES ─────────────────────────────────────────────
+function renderInvoices(mr) {
+  const invRecs = mr.filter(r=>r.type==="invoice");
+  const totalInv   = invRecs.reduce((a,b)=>a+b.amount,0);
+  const totalTax   = invRecs.reduce((a,b)=>a+(b.inv_tax||0),0);
+  const totalSub   = invRecs.reduce((a,b)=>a+(b.inv_subtotal||0),0);
+
+  let html = `
+  <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="stat-card"><div class="stat-label">Total facturado</div><div class="stat-num" style="color:#059669;font-size:18px">${fmt(totalInv)}</div></div>
+    <div class="stat-card"><div class="stat-label">IVA cobrado 5%</div><div class="stat-num" style="color:#6366f1;font-size:18px">${fmt(totalTax)}</div></div>
+    <div class="stat-card"><div class="stat-label">Facturas</div><div class="stat-num" style="color:#0891b2;font-size:18px">${invRecs.length}</div></div>
+  </div>
+  <div class="card">
+    <div class="slabel">Detalle de facturas — ${MONTHS[filterMonth]} ${filterYear}</div>`;
+
+  if(!invRecs.length) {
+    html += `<div class="empty" style="padding:24px 0"><div class="empty-icon">🧾</div><div style="font-size:13px">Sin facturas este mes</div><button class="btn btn-primary btn-sm" style="margin-top:16px" onclick="openFormWithType('invoice')">+ Agregar factura</button></div>`;
+  } else {
+    html += `<div style="overflow-x:auto">
+    <table class="inv-table">
+      <thead><tr>
+        <th style="text-align:left">Descripción</th>
+        <th>Fecha</th>
+        <th>Cant.</th>
+        <th>P.Unit.</th>
+        <th>Subtotal</th>
+        <th style="color:#059669">IVA 5%</th>
+        <th style="color:#059669">Total</th>
+        <th></th>
+      </tr></thead>
+      <tbody>`;
+    invRecs.forEach(r => {
+      html += `<tr>
+        <td>${r.description}</td>
+        <td style="color:var(--text3);font-size:11px">${fmtDate(r.date)}</td>
+        <td>${r.inv_qty||1}</td>
+        <td>${fmt(r.inv_unit_price||0)}</td>
+        <td>${fmt(r.inv_subtotal||0)}</td>
+        <td style="color:#059669;font-weight:600">${fmt(r.inv_tax||0)}</td>
+        <td style="color:#059669;font-weight:700">${fmt(r.amount)}</td>
+        <td><button class="btn-icon" style="font-size:13px;color:#fca5a5" onclick="deleteRecord('${r.id}')">✕</button></td>
+      </tr>`;
+    });
+    html += `</tbody>
+      <tfoot><tr class="inv-total-row">
+        <td colspan="4">TOTALES</td>
+        <td>${fmt(totalSub)}</td>
+        <td style="color:#059669">${fmt(totalTax)}</td>
+        <td style="color:#059669">${fmt(totalInv)}</td>
+        <td></td>
+      </tr></tfoot>
+    </table></div>`;
+  }
+  html += `</div>`;
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── CARD ─────────────────────────────────────────────────
+function renderCard(mr) {
+  const cardRecs = mr.filter(r=>r.type==="card");
+  const total = cardRecs.reduce((a,b)=>a+b.amount,0);
+  const avg   = cardRecs.length ? total/cardRecs.length : 0;
+
+  const stores = {};
+  cardRecs.forEach(r => { const k=r.card_store||"Sin comercio"; stores[k]=(stores[k]||0)+r.amount; });
+
+  let html = `
+  <div class="stat-grid">
+    <div class="stat-card card-colored" style="background:#fffbeb;border-color:#fde68a">
+      <div class="stat-label" style="color:#d97706">Total consumido</div>
+      <div class="stat-num" style="color:#d97706;font-size:18px">${fmt(total)}</div>
+    </div>
+    <div class="stat-card card-colored" style="background:#fffbeb;border-color:#fde68a">
+      <div class="stat-label" style="color:#d97706">Transacciones</div>
+      <div class="stat-num" style="color:#6366f1;font-size:18px">${cardRecs.length}</div>
+    </div>
+  </div>`;
+
+  if(Object.keys(stores).length) {
+    html += `<div class="card"><div class="slabel">Por tienda / comercio</div>`;
+    Object.entries(stores).sort((a,b)=>b[1]-a[1]).forEach(([st,amt]) => {
+      const pct = total>0?(amt/total*100):0;
+      html += `<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:13px;font-weight:500">${st}</span>
+          <span style="font-size:13px;font-weight:700;color:#d97706">${fmt(amt)}</span>
+        </div>
+        <div class="store-bar"><div class="store-bar-track"><div class="store-bar-fill" style="width:${pct}%"></div></div><span style="font-size:10px;color:var(--text3);flex-shrink:0">${pct.toFixed(0)}%</span></div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="card"><div class="slabel">Todos los cargos</div>`;
+  if(!cardRecs.length) {
+    html += `<div class="empty" style="padding:24px 0"><div class="empty-icon">💳</div><div style="font-size:13px">Sin cargos este mes</div></div>`;
+  } else {
+    cardRecs.forEach((r,i) => {
+      html += `${i>0?'<div class="sep"></div>':''}
+      <div class="rec-row">
+        <div class="rec-info">
+          <div class="rec-name">${r.description}</div>
+          <div class="rec-meta">${r.card_store||"Sin comercio"} · ${fmtDate(r.date)}${r.card_installments>1?`<span style="color:#d97706"> · ${r.card_installments} cuotas (${fmt(r.amount/r.card_installments)}/c)</span>`:""}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span style="font-weight:700;color:#d97706;font-size:13px">${fmt(r.amount)}</span>
+          <button class="btn-icon" style="font-size:13px;color:#94a3b8" onclick="editRecord('${r.id}')">✎</button>
+          <button class="btn-icon" style="font-size:13px;color:#fca5a5" onclick="deleteRecord('${r.id}')">✕</button>
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── TAXES ────────────────────────────────────────────────
+function renderTaxes(mr) {
+  let html = "";
+  [{label:"Mis Impuestos",type:"tax_me",color:"#db2777",bg:"#fdf2f8",border:"#fbcfe8"},
+   {label:"Impuestos Cindy",type:"tax_cindy",color:"#ea580c",bg:"#fff7ed",border:"#fed7aa"}
+  ].forEach(t => {
+    const recs  = mr.filter(r=>r.type===t.type);
+    const total = recs.reduce((a,b)=>a+b.amount,0);
+    html += `
+    <div class="stat-card card-colored" style="background:${t.bg};border-color:${t.border};margin-bottom:10px">
+      <div class="stat-label" style="color:${t.color}">${t.label.toUpperCase()}</div>
+      <div class="stat-num" style="color:${t.color};margin-bottom:12px">${fmt(total)}</div>
+      <div style="display:flex;gap:20px">
+        ${[["pagado","✅","#16a34a"],["pendiente","⏳","#d97706"],["presentado","📤","#2563eb"]].map(([s,ic,c])=>`
+          <div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-weight:500">${ic} ${s}</div><div style="font-weight:800;color:${c};font-size:16px">${recs.filter(r=>r.tax_status===s).length}</div></div>
+        `).join("")}
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="slabel" style="margin:0">${t.label}</div>
+        <button class="btn btn-primary btn-sm" onclick="openFormWithType('${t.type}')">+ Agregar</button>
+      </div>`;
+    if(!recs.length) html += `<div style="text-align:center;color:var(--text3);font-size:13px;padding:16px 0">Sin registros este mes</div>`;
+    else recs.forEach((r,i) => {
+      html += `${i>0?'<div class="sep"></div>':''}
+      <div class="rec-row">
+        <div class="rec-info">
+          <div class="rec-name">${r.description}</div>
+          <div class="rec-meta">${r.tax_period} · ${fmtDate(r.date)}</div>
+          ${taxBadge(r.tax_status)}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span style="font-weight:700;color:${t.color};font-size:13px">${fmt(r.amount)}</span>
+          <button class="btn-icon" style="font-size:13px;color:#94a3b8" onclick="editRecord('${r.id}')">✎</button>
+          <button class="btn-icon" style="font-size:13px;color:#fca5a5" onclick="deleteRecord('${r.id}')">✕</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  // History
+  html += `<div class="card"><div class="slabel">Historial de impuestos</div>`;
+  const allTax = records.filter(r=>r.type==="tax_me"||r.type==="tax_cindy");
+  if(!allTax.length) {
+    html += `<div style="text-align:center;color:var(--text3);font-size:13px;padding:16px 0">Sin historial</div>`;
+  } else {
+    const byM = {};
+    allTax.forEach(r => {
+      const k=`${r.year}-${String(r.month).padStart(2,"0")}`;
+      if(!byM[k]) byM[k]={year:r.year,month:r.month,me:[],cindy:[]};
+      if(r.type==="tax_me") byM[k].me.push(r); else byM[k].cindy.push(r);
+    });
+    Object.entries(byM).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([k,v],i) => {
+      const me=v.me.reduce((a,b)=>a+b.amount,0), ci=v.cindy.reduce((a,b)=>a+b.amount,0);
+      html += `${i>0?'<div class="sep"></div>':''}
+      <div class="rec-row" style="flex-wrap:wrap;gap:8px">
+        <div class="rec-info">
+          <div class="rec-name">${MONTHS[v.month]} ${v.year}</div>
+          <div class="rec-meta">Yo: ${fmt(me)} · Cindy: ${fmt(ci)}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${[...v.me.map(r=>({...r,who:"Yo"})),...v.cindy.map(r=>({...r,who:"Cindy"}))].map(r=>`<span class="badge" style="${taxBadgeStyle(r.tax_status)}">${r.who}: ${r.tax_status}</span>`).join("")}
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  document.getElementById("content").innerHTML = html;
+}
+
+function taxBadgeStyle(s) {
+  const map = {pagado:"background:#f0fdf4;color:#16a34a;border-color:#bbf7d0",presentado:"background:#eff6ff;color:#2563eb;border-color:#bfdbfe",pendiente:"background:#fffbeb;color:#d97706;border-color:#fde68a"};
+  return map[s]||map.pendiente;
+}
+
+// ─── REMINDERS ────────────────────────────────────────────
+function renderReminders() {
+  const todayDay = TODAY.getDate();
+
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div><div style="font-size:16px;font-weight:700">Recordatorios</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Vencimientos recurrentes</div></div>
+    <button class="btn btn-primary btn-sm" onclick="openRemForm()">+ Nuevo</button>
+  </div>`;
+
+  // Notification status
+  if(Notification.permission==="default") {
+    html += `<div class="notif-prompt">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px">🔔 Activa las notificaciones push</div>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.5">Recibe alertas en tu iPhone cuando se acerque un vencimiento. Guarda primero la app en tu pantalla de inicio.</p>
+      <button class="btn btn-primary btn-sm" onclick="requestNotifPermission()">Activar ahora</button>
+    </div>`;
+  } else if(Notification.permission==="granted") {
+    html += `<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#16a34a;font-weight:600">✅ Notificaciones activadas — recibirás avisos en tu iPhone</div>`;
+  } else {
+    html += `<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#dc2626;font-weight:600">❌ Notificaciones bloqueadas — ve a Configuración de Safari para habilitarlas</div>`;
+  }
+
+  if(!reminders.length) {
+    html += `<div class="card"><div class="empty">
+      <div class="empty-icon">🔔</div>
+      <div class="empty-title">Sin recordatorios</div>
+      <div class="empty-sub">Agrega recordatorios para impuestos, teléfono e internet.</div>
+      <button class="btn btn-primary" onclick="openRemForm()">+ Crear recordatorio</button>
+    </div></div>`;
+    document.getElementById("content").innerHTML = html;
+    return;
+  }
+
+  Object.entries(REM_TYPES).forEach(([typeId, rt]) => {
+    const group = reminders.filter(r=>r.type===typeId);
+    if(!group.length) return;
+    html += `<div class="slabel">${rt.icon} ${rt.label.toUpperCase()}</div>`;
+    group.forEach(r => {
+      const diff = parseInt(r.dueDay) - todayDay;
+      const diffLabel = diff<0?`${Math.abs(diff)}d atrás`:diff===0?"¡HOY!":`${diff}d`;
+      const diffBg = diff<0?"#fef2f2":diff===0?"#fef3c7":"#f0fdf4";
+      const diffColor = diff<0?"#dc2626":diff===0?"#d97706":"#16a34a";
+      const diffBorder = diff<0?"#fecaca":diff===0?"#fde68a":"#bbf7d0";
+      html += `<div class="rem-card" style="opacity:${r.active?1:.5}">
+        <div class="rem-icon-wrap" style="background:${r.active?"rgba(99,102,241,.1)":"#f8fafc"};">${rt.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${r.notes}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Día ${r.dueDay} · ${r.person}${r.amount>0?` · ${fmt(r.amount)}`:""}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          ${r.active?`<span class="badge" style="background:${diffBg};color:${diffColor};border-color:${diffBorder}">${diffLabel}</span>`:""}
+          <div style="display:flex;gap:4px;align-items:center">
+            <button class="switch ${r.active?"on":"off"}" onclick="toggleReminder('${r.id}')"></button>
+            <button class="btn-icon" style="font-size:14px;color:#94a3b8" onclick="editReminder('${r.id}')">✎</button>
+            <button class="btn-icon" style="font-size:14px;color:#fca5a5" onclick="deleteReminder('${r.id}')">✕</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  });
+
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── Form ─────────────────────────────────────────────────
+function openForm(type) {
+  editId = null;
+  formType = type || "income";
+  document.getElementById("form-title").textContent = "Nuevo Registro";
+  document.getElementById("form-btn-text").textContent = "Guardar";
+  const d = new Date(); 
+  document.getElementById("f-date").value = d.toISOString().split("T")[0];
+  document.getElementById("f-month").value = filterMonth;
+  document.getElementById("f-year").value  = filterYear;
+  document.getElementById("f-desc").value  = "";
+  document.getElementById("f-amount").value = "";
+  document.getElementById("f-store").value = "";
+  document.getElementById("f-installments").value = 1;
+  document.getElementById("f-qty").value   = 1;
+  document.getElementById("f-unit").value  = "";
+  document.getElementById("f-period").value = "";
+  document.getElementById("f-taxstatus").value = "pendiente";
+  document.getElementById("f-tags").value  = "";
+  renderTypeGrid();
+  updateFormBlocks();
+  document.getElementById("form-modal").style.display = "flex";
+}
+
+function openFormWithType(t) { openForm(t); }
+
+function closeForm() {
+  document.getElementById("form-modal").style.display = "none";
+  editId = null;
+}
+
+function renderTypeGrid() {
+  const grid = document.getElementById("type-grid");
+  grid.innerHTML = Object.entries(CAT).map(([k,v]) => {
+    const on = formType===k;
+    return `<button class="type-btn ${on?"on":""}" onclick="selectType('${k}')"
+      style="${on?`background:${v.bg};color:${v.color};border-color:${v.border};`:""}">
+      ${v.icon} ${v.label}
+    </button>`;
+  }).join("");
+}
+
+function selectType(t) {
+  formType = t;
+  renderTypeGrid();
+  updateFormBlocks();
+}
+
+function updateFormBlocks() {
+  document.getElementById("amount-block").style.display  = formType==="invoice"?"none":"block";
+  document.getElementById("invoice-block").style.display = formType==="invoice"?"block":"none";
+  document.getElementById("card-block").style.display    = formType==="card"?"block":"none";
+  document.getElementById("tax-block").style.display     = (formType==="tax_me"||formType==="tax_cindy")?"block":"none";
+  updateInvoicePreview();
+}
+
+function updateInvoicePreview() {
+  const qty  = parseFloat(document.getElementById("f-qty").value)||0;
+  const unit = parseFloat(document.getElementById("f-unit").value)||0;
+  const sub  = qty*unit, tax=sub*0.05, total=sub+tax;
+  document.getElementById("prev-sub").textContent   = fmt(sub);
+  document.getElementById("prev-tax").textContent   = fmt(tax);
+  document.getElementById("prev-total").textContent = fmt(total);
+}
+document.addEventListener("input", e => { if(e.target.id==="f-qty"||e.target.id==="f-unit") updateInvoicePreview(); });
+
+function submitForm() {
+  const desc = document.getElementById("f-desc").value.trim();
+  if(!desc) { toast("Agrega una descripción","err"); return; }
+  let amount;
+  let invSubtotal=0, invTax=0;
+  if(formType==="invoice") {
+    const qty  = parseFloat(document.getElementById("f-qty").value)||0;
+    const unit = parseFloat(document.getElementById("f-unit").value)||0;
+    if(!unit) { toast("Ingresa precio unitario","err"); return; }
+    invSubtotal = qty*unit; invTax = invSubtotal*TAX_RATE; amount = invSubtotal+invTax;
+  } else {
+    amount = parseFloat(document.getElementById("f-amount").value);
+    if(!amount||amount<=0) { toast("Ingresa un monto válido","err"); return; }
+  }
+  const rec = {
+    id: editId||Date.now().toString(),
+    type: formType,
+    description: desc,
+    amount,
+    date:   document.getElementById("f-date").value,
+    month:  parseInt(document.getElementById("f-month").value),
+    year:   parseInt(document.getElementById("f-year").value),
+    tags:   document.getElementById("f-tags").value,
+    card_store:        document.getElementById("f-store").value,
+    card_installments: parseInt(document.getElementById("f-installments").value)||1,
+    inv_qty:       parseFloat(document.getElementById("f-qty").value)||1,
+    inv_unit_price:parseFloat(document.getElementById("f-unit").value)||0,
+    inv_subtotal:  invSubtotal,
+    inv_tax:       invTax,
+    tax_period:    document.getElementById("f-period").value,
+    tax_status:    document.getElementById("f-taxstatus").value,
+    createdAt: editId?(records.find(r=>r.id===editId)?.createdAt||Date.now()):Date.now(),
+  };
+  if(editId) records = records.map(r=>r.id===editId?rec:r);
+  else records.unshift(rec);
+  saveRec();
+  closeForm();
+  toast(editId?"Registro actualizado ✓":"Registro guardado ✓");
+  render();
+}
+
+function editRecord(id) {
+  const r = records.find(x=>x.id===id); if(!r) return;
+  editId = id;
+  formType = r.type;
+  document.getElementById("form-title").textContent = "Editar Registro";
+  document.getElementById("form-btn-text").textContent = "Actualizar";
+  document.getElementById("f-date").value = r.date;
+  document.getElementById("f-month").value = r.month;
+  document.getElementById("f-year").value  = r.year;
+  document.getElementById("f-desc").value  = r.description;
+  document.getElementById("f-amount").value = r.amount;
+  document.getElementById("f-store").value = r.card_store||"";
+  document.getElementById("f-installments").value = r.card_installments||1;
+  document.getElementById("f-qty").value   = r.inv_qty||1;
+  document.getElementById("f-unit").value  = r.inv_unit_price||"";
+  document.getElementById("f-period").value = r.tax_period||"";
+  document.getElementById("f-taxstatus").value = r.tax_status||"pendiente";
+  document.getElementById("f-tags").value  = r.tags||"";
+  renderTypeGrid(); updateFormBlocks();
+  document.getElementById("form-modal").style.display = "flex";
+}
+
+function deleteRecord(id) {
+  if(!confirm("¿Eliminar este registro?")) return;
+  records = records.filter(r=>r.id!==id);
+  saveRec(); toast("Eliminado"); render();
+}
+
+// ─── Reminder form ────────────────────────────────────────
+function openRemForm() {
+  editRemId = null;
+  document.getElementById("rem-form-title").textContent = "Nuevo Recordatorio";
+  document.getElementById("rem-btn-text").textContent = "Guardar";
+  document.getElementById("rem-notes").value  = "";
+  document.getElementById("rem-person").value = "Yo";
+  document.getElementById("rem-day").value    = 15;
+  document.getElementById("rem-amount").value = "";
+  document.getElementById("rem-type").value   = "tax";
+  document.querySelectorAll("[data-remtype]").forEach(b => b.classList.toggle("on", b.dataset.remtype==="tax"));
+  document.getElementById("rem-modal").style.display = "flex";
+}
+
+function closeRemForm() {
+  document.getElementById("rem-modal").style.display = "none"; editRemId = null;
+}
+
+function selectRemType(btn) {
+  document.querySelectorAll("[data-remtype]").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  document.getElementById("rem-type").value = btn.dataset.remtype;
+}
+
+function submitRemForm() {
+  const notes = document.getElementById("rem-notes").value.trim();
+  if(!notes) { toast("Agrega una descripción","err"); return; }
+  const rem = {
+    id: editRemId||Date.now().toString(),
+    type: document.getElementById("rem-type").value,
+    notes,
+    person: document.getElementById("rem-person").value,
+    dueDay: parseInt(document.getElementById("rem-day").value)||15,
+    amount: parseFloat(document.getElementById("rem-amount").value)||0,
+    active: editRemId ? (reminders.find(r=>r.id===editRemId)?.active??true) : true,
+  };
+  if(editRemId) reminders = reminders.map(r=>r.id===editRemId?rem:r);
+  else reminders.unshift(rem);
+  saveRem();
+  closeRemForm();
+  toast(editRemId?"Recordatorio actualizado":"Recordatorio guardado");
+  
+  // Schedule notification for this reminder
+  scheduleRemNotification(rem);
+  render();
+}
+
+function editReminder(id) {
+  const r = reminders.find(x=>x.id===id); if(!r) return;
+  editRemId = id;
+  document.getElementById("rem-form-title").textContent = "Editar Recordatorio";
+  document.getElementById("rem-btn-text").textContent   = "Actualizar";
+  document.getElementById("rem-notes").value  = r.notes;
+  document.getElementById("rem-person").value = r.person;
+  document.getElementById("rem-day").value    = r.dueDay;
+  document.getElementById("rem-amount").value = r.amount||"";
+  document.getElementById("rem-type").value   = r.type;
+  document.querySelectorAll("[data-remtype]").forEach(b=>b.classList.toggle("on",b.dataset.remtype===r.type));
+  document.getElementById("rem-modal").style.display = "flex";
+}
+
+function deleteReminder(id) {
+  if(!confirm("¿Eliminar este recordatorio?")) return;
+  reminders = reminders.filter(r=>r.id!==id);
+  saveRem(); toast("Recordatorio eliminado"); render();
+}
+
+function toggleReminder(id) {
+  reminders = reminders.map(r=>r.id===id?{...r,active:!r.active}:r);
+  saveRem(); render();
+}
+
+// ─── Notifications ────────────────────────────────────────
+function openNotifModal() { document.getElementById("notif-modal").style.display = "flex"; }
+function closeNotifModal() { document.getElementById("notif-modal").style.display = "none"; }
+
+async function requestNotifPermission() {
+  closeNotifModal();
+  if(!("Notification" in window)) { toast("Tu navegador no soporta notificaciones","err"); return; }
+  const perm = await Notification.requestPermission();
+  if(perm==="granted") {
+    toast("✅ Notificaciones activadas");
+    // Send a test notification
+    new Notification("💰 Finanzas Personales", {
+      body: "¡Notificaciones activadas! Te avisaremos antes de cada vencimiento.",
+      icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236366f1'/><text y='.9em' font-size='70' x='12'>💰</text></svg>"
+    });
+    // Schedule all reminders
+    reminders.forEach(r => { if(r.active) scheduleRemNotification(r); });
+  } else if(perm==="denied") {
+    toast("Notificaciones bloqueadas — actívalas en Configuración","err");
+  }
+  render();
+}
+
+function scheduleRemNotification(rem) {
+  if(Notification.permission!=="granted") return;
+  const now = new Date();
+  const day = parseInt(rem.dueDay);
+  // Next occurrence of dueDay
+  let target = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
+  if(target <= now) target = new Date(now.getFullYear(), now.getMonth()+1, day, 9, 0, 0);
+  const ms = target.getTime() - now.getTime();
+  if(ms > 0 && ms < 30*24*60*60*1000) { // Only within 30 days
+    const rt = REM_TYPES[rem.type]||REM_TYPES.tax;
+    setTimeout(() => {
+      if(Notification.permission==="granted") {
+        new Notification(`${rt.icon} ${rt.label}`, {
+          body: `${rem.notes}${rem.amount>0?` · ${fmt(rem.amount)}`:""}`,
+          tag: `rem-${rem.id}`,
+          icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236366f1'/><text y='.9em' font-size='70' x='12'>💰</text></svg>"
+        });
+      }
+    }, ms);
+  }
+}
+
+function scheduleDailyCheck() {
+  // Check every time app opens and schedule for +3 days and same day
+  if(Notification.permission!=="granted") return;
+  const todayDay = TODAY.getDate();
+  reminders.filter(r=>r.active).forEach(rem => {
+    const diff = parseInt(rem.dueDay) - todayDay;
+    if(diff===3||diff===1||diff===0) {
+      const rt = REM_TYPES[rem.type]||REM_TYPES.tax;
+      const msg = diff===0 ? "¡Vence HOY!" : `Vence en ${diff} día${diff>1?"s":""}`;
+      setTimeout(() => {
+        if(Notification.permission==="granted") {
+          new Notification(`${rt.icon} Recordatorio: ${rem.notes}`, {
+            body: `${msg}${rem.amount>0?` · ${fmt(rem.amount)}`:""}`,
+            tag: `daily-${rem.id}-${diff}`,
+          });
+        }
+      }, 3000); // 3 seconds after opening app
+    }
+  });
+}
+
+function checkUrgentReminders() {
+  const todayDay = TODAY.getDate();
+  const urgent = reminders.filter(r=>r.active && Math.abs(parseInt(r.dueDay)-todayDay)<=5);
+  if(urgent.length) {
+    // Update notif btn appearance
+    const btn = document.getElementById("notif-btn");
+    btn.style.position = "relative";
+  }
+}
+
+// ─── Register Service Worker (for PWA offline support) ───
+if('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'finanzas-v1';
+    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(['.']))));
+    self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('.')))));
+    self.addEventListener('notificationclick', e => { e.notification.close(); e.waitUntil(clients.openWindow('.')); });
+  `;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swURL  = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL).catch(()=>{});
+}
+
+// ─── Start ────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
